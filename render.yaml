@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: raster2svg
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    autoDeploy: true
