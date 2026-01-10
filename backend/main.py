@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+import cv2
 from PIL import Image, ImageFilter
 import numpy as np
 from sklearn.cluster import KMeans
@@ -170,7 +171,7 @@ def generate_svg_potrace(labels: np.ndarray, palette: list, width: int, height: 
     parts.append('</svg>')
     return "".join(parts)
 
-def process_image_task(task_id: str, image_bytes: bytes, colors: int):
+def process_image_task(task_id: str, image_bytes: bytes, colors: int, smoothing: str):
     try:
         tasks[task_id] = {"status": "processing", "progress": 0, "message": "Starting..."}
         
@@ -181,14 +182,45 @@ def process_image_task(task_id: str, image_bytes: bytes, colors: int):
         tasks[task_id].update({"progress": 5, "message": "Resizing..."})
         resized_image = resize_image_if_needed(image, max_size=1000)
         
-        # Apply Blur
-        resized_image = resized_image.filter(ImageFilter.GaussianBlur(radius=1))
+        # Convert to CV2 (BGR)
+        img_cv = cv2.cvtColor(np.array(resized_image), cv2.COLOR_RGB2BGR)
 
-        # 2. Reduce Colors (K-Means)
-        tasks[task_id].update({"progress": 10, "message": "Riduzione colori..."})
+        # 2. Pre-processing: Denoising & Simplification
+        tasks[task_id].update({"progress": 10, "message": "Denoising & Smoothing..."})
+        
+        # Determine parameters based on smoothing mode
+        if smoothing == "aggressive":
+            d = 15
+            sigma = 75
+            ksize = 5
+        else: # light
+            d = 9
+            sigma = 50
+            ksize = 3
+
+        # Bilateral Filter
+        img_cv = cv2.bilateralFilter(img_cv, d=d, sigmaColor=sigma, sigmaSpace=sigma)
+        
+        # Simplification: Median Blur
+        img_cv = cv2.medianBlur(img_cv, ksize)
+
+        # Convert back to PIL RGB for K-Means
+        img_rgb = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
+        preprocessed_image = Image.fromarray(img_rgb)
+
+        # 3. Reduce Colors (K-Means)
+        tasks[task_id].update({"progress": 30, "message": "Riduzione colori..."})
         # Note: K-Means can be slow too, but we don't have a progress callback for it easily
         # We could run it in a thread if needed, but here we just run it synchronously in the background task
-        processed_image, palette, labels = reduce_colors(resized_image, colors)
+        processed_image, palette, labels = reduce_colors(preprocessed_image, colors)
+        
+        # 4. Final Polish: Median Blur on labels
+        tasks[task_id].update({"progress": 60, "message": "Final Polish..."})
+        # Apply Median Blur to labels to smooth regions
+        # labels is (w, h) int32 usually, need uint8 for cv2
+        labels_uint8 = labels.astype(np.uint8)
+        labels_polished = cv2.medianBlur(labels_uint8, 5)
+        labels = labels_polished
         
         # Verify color count
         # unique_colors = count_unique_colors(processed_image)
@@ -219,24 +251,22 @@ def process_image_task(task_id: str, image_bytes: bytes, colors: int):
         }
 
 @app.post("/convert")
-async def start_conversion(
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
-    colors: int = Form(...)
+async def convert_image(
+    background_tasks: BackgroundTasks, 
+    file: UploadFile = File(...), 
+    colors: int = Form(...),
+    smoothing: str = Form("light")
 ):
-    try:
-        contents = await file.read()
-        task_id = str(uuid.uuid4())
-        
-        # Start background task
-        # Note: process_image_task is a synchronous function (def), so FastAPI will run it 
-        # in a thread pool, preventing it from blocking the event loop.
-        background_tasks.add_task(process_image_task, task_id, contents, colors)
-        
-        return {"task_id": task_id}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    # Create unique task ID
+    task_id = str(uuid.uuid4())
+    
+    # Read file
+    image_bytes = await file.read()
+    
+    # Start background task
+    background_tasks.add_task(process_image_task, task_id, image_bytes, colors, smoothing)
+    
+    return {"task_id": task_id}
 
 @app.get("/status/{task_id}")
 async def get_status(task_id: str):

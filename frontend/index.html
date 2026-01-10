@@ -47,6 +47,20 @@
                     <input type="range" id="colorSlider" min="1" max="30" value="12">
                 </div>
 
+                <div class="control-group">
+                    <label style="margin-bottom: 8px; display: block;" data-i18n="smoothingTitle">Modalità Smoothing</label>
+                    <div style="display: flex; gap: 15px;">
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="smoothing" value="light" checked>
+                            <span data-i18n="smoothingLight">Leggero</span>
+                        </label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="smoothing" value="aggressive">
+                            <span data-i18n="smoothingAggressive">Aggressivo</span>
+                        </label>
+                    </div>
+                </div>
+
                 <button id="convertBtn" disabled data-i18n="convertBtn">Converti in SVG</button>
                 <a id="downloadBtn" class="button hidden" download="converted.svg" data-i18n="downloadBtn">Scarica SVG</a>
 

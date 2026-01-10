@@ -28,7 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
             convertBtn: "Converti in SVG",
             downloadBtn: "Scarica SVG",
             paletteTitle: "Palette",
-            errorMsg: "Errore durante la conversione"
+            errorMsg: "Errore durante la conversione",
+            smoothingTitle: "Modalità Smoothing",
+            smoothingLight: "Leggero",
+            smoothingAggressive: "Aggressivo"
         },
         en: {
             placeholder: "Upload an image to start",
@@ -40,7 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
             convertBtn: "Convert to SVG",
             downloadBtn: "Download SVG",
             paletteTitle: "Palette",
-            errorMsg: "Error during conversion"
+            errorMsg: "Error during conversion",
+            smoothingTitle: "Smoothing Mode",
+            smoothingLight: "Light",
+            smoothingAggressive: "Aggressive"
         }
     };
 
@@ -123,6 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('file', selectedFile);
         formData.append('colors', colorSlider.value);
+        
+        const smoothingMode = document.querySelector('input[name="smoothing"]:checked').value;
+        formData.append('smoothing', smoothingMode);
 
         try {
             // 1. Start Conversion Task
