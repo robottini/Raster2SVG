@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+import sys
 import cv2
 from PIL import Image, ImageFilter
 import numpy as np
@@ -36,7 +37,15 @@ app.add_middleware(
 # /RasterSVG/frontend/index.html
 # So we need to point to ../frontend
 
-FRONTEND_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
+# Determine base path (handles both normal and PyInstaller bundle cases)
+if getattr(sys, 'frozen', False):
+    # Running as a PyInstaller bundle
+    base_path = sys._MEIPASS
+else:
+    # Running normally
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+FRONTEND_PATH = os.path.join(base_path, "frontend")
 
 app.mount("/static", StaticFiles(directory=FRONTEND_PATH), name="static")
 
