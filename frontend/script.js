@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const colorValue = document.getElementById('colorValue');
     const convertBtn = document.getElementById('convertBtn');
     const downloadBtn = document.getElementById('downloadBtn');
+    const exitBtn = document.getElementById('exitBtn');
     const loading = document.getElementById('loading');
     const imageContainer = document.getElementById('imageContainer');
     const placeholderText = document.getElementById('placeholderText');
@@ -27,11 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
             colorsTitle: "Numero dei colori SVG",
             convertBtn: "Converti in SVG",
             downloadBtn: "Scarica SVG",
+            exitBtn: "ESCI",
             paletteTitle: "Palette",
             errorMsg: "Errore durante la conversione",
             smoothingTitle: "Modalità Smoothing",
             smoothingLight: "Leggero",
-            smoothingAggressive: "Aggressivo"
+            smoothingAggressive: "Aggressivo",
+            excludeTitle: "Escludi Colore",
+            excludeWhite: "Bianco",
+            excludeBlack: "Nero"
         },
         en: {
             placeholder: "Upload an image to start",
@@ -42,11 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
             colorsTitle: "Number of SVG Colors",
             convertBtn: "Convert to SVG",
             downloadBtn: "Download SVG",
+            exitBtn: "EXIT",
             paletteTitle: "Palette",
             errorMsg: "Error during conversion",
             smoothingTitle: "Smoothing Mode",
             smoothingLight: "Light",
-            smoothingAggressive: "Aggressive"
+            smoothingAggressive: "Aggressive",
+            excludeTitle: "Exclude Color",
+            excludeWhite: "White",
+            excludeBlack: "Black"
         }
     };
 
@@ -81,27 +90,107 @@ document.addEventListener('DOMContentLoaded', () => {
     langEn.addEventListener('click', () => setLanguage('en'));
 
     let selectedFile = null;
+    let currentSvgContent = null;
+
+    // Handle pywebview download (Desktop App)
+    downloadBtn.addEventListener('click', (e) => {
+        if (window.pywebview) {
+            e.preventDefault();
+            if (currentSvgContent) {
+                const fname = selectedFile ? selectedFile.name : null;
+                window.pywebview.api.save_svg(currentSvgContent, fname);
+            }
+        }
+    });
+
+    // Exit button handler
+    if (exitBtn) {
+        exitBtn.addEventListener('click', () => {
+            if (window.pywebview) {
+                window.pywebview.api.close_app();
+            }
+        });
+    }
+
+    // Show Exit button if running in pywebview
+    const showExitBtn = () => {
+        if (exitBtn) exitBtn.classList.remove('hidden');
+    };
+
+    if (window.pywebview) {
+        showExitBtn();
+    } else {
+        window.addEventListener('pywebviewready', showExitBtn);
+    }
 
     // Handle File Selection
     imageInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files[0]) {
-            selectedFile = e.target.files[0];
-            fileName.textContent = selectedFile.name;
-            convertBtn.disabled = false;
-            
-            // Hide SVG/Download if exists
-            downloadBtn.classList.add('hidden');
-            paletteContainer.classList.add('hidden');
-
-            // Preview Original
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                placeholderText.classList.add('hidden');
-                imageContainer.innerHTML = `<img src="${e.target.result}" alt="Original">`;
-            };
-            reader.readAsDataURL(selectedFile);
+            handleFileSelect(e.target.files[0]);
         }
     });
+
+    // Intercept click on upload button for Desktop App
+    const uploadButton = document.querySelector('.custom-file-upload');
+    if (uploadButton) {
+        uploadButton.addEventListener('click', (e) => {
+            if (window.pywebview) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                window.pywebview.api.open_image().then(result => {
+                    if (result) {
+                        // Convert base64 to Blob/File
+                        const byteCharacters = atob(result.data);
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        // Detect MIME type based on filename extension
+                        let mimeType = 'image/jpeg';
+                        const filenameLower = result.filename.toLowerCase();
+                        if (filenameLower.endsWith('.png')) {
+                            mimeType = 'image/png';
+                        } else if (filenameLower.endsWith('.gif')) {
+                            mimeType = 'image/gif';
+                        } else if (filenameLower.endsWith('.bmp')) {
+                            mimeType = 'image/bmp';
+                        } else if (filenameLower.endsWith('.webp')) {
+                            mimeType = 'image/webp';
+                        }
+                        const blob = new Blob([byteArray], { type: mimeType });
+                        
+                        // Create File object
+                        const file = new File([blob], result.filename, { type: mimeType });
+                        
+                        // Handle as if selected via input
+                        handleFileSelect(file);
+                    }
+                });
+            }
+        });
+    }
+
+    function handleFileSelect(file) {
+        selectedFile = file;
+        fileName.textContent = selectedFile.name;
+        convertBtn.disabled = false;
+        
+        // Hide SVG/Download if exists
+        downloadBtn.classList.add('disabled');
+        // If it was hidden (old logic), ensure it's visible but disabled
+        downloadBtn.classList.remove('hidden');
+        paletteContainer.classList.add('hidden');
+
+        // Preview Original
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            placeholderText.classList.add('hidden');
+            imageContainer.innerHTML = `<img src="${e.target.result}" alt="Original">`;
+        };
+        reader.readAsDataURL(selectedFile);
+    }
 
     // Handle Slider Change
     colorSlider.addEventListener('input', (e) => {
@@ -116,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loading.classList.remove('hidden');
         convertBtn.disabled = true;
         paletteContainer.classList.add('hidden');
-        downloadBtn.classList.add('hidden');
+        downloadBtn.classList.add('disabled');
         
         // Reset Progress
         const progressBar = document.getElementById('progressBar');
@@ -132,6 +221,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const smoothingMode = document.querySelector('input[name="smoothing"]:checked').value;
         formData.append('smoothing', smoothingMode);
+        
+        const excludeWhite = document.getElementById('excludeWhite').checked;
+        const excludeBlack = document.getElementById('excludeBlack').checked;
+        formData.append('excludeWhite', excludeWhite);
+        formData.append('excludeBlack', excludeBlack);
 
         try {
             // 1. Start Conversion Task
@@ -204,6 +298,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function finishConversion(data) {
         const svgText = data.svg;
         const palette = data.palette;
+        
+        currentSvgContent = svgText;
 
         // Display SVG (Replace original image)
         imageContainer.innerHTML = svgText;
@@ -242,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const blob = new Blob([svgText], { type: 'image/svg+xml' });
         const url = URL.createObjectURL(blob);
         downloadBtn.href = url;
-        downloadBtn.classList.remove('hidden');
+        downloadBtn.classList.remove('disabled');
 
         // Hide Loading
         loading.classList.add('hidden');

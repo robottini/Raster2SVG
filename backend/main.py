@@ -59,6 +59,18 @@ def resize_image_if_needed(image: Image.Image, max_size: int = 1000) -> Image.Im
 def rgb_to_hex(rgb):
     return '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
 
+def hex_to_rgb(hex_color):
+    hex_color = hex_color.lstrip('#')
+    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+def is_white(rgb):
+    # Check if color is white (with small tolerance)
+    return rgb[0] > 240 and rgb[1] > 240 and rgb[2] > 240
+
+def is_black(rgb):
+    # Check if color is black (with small tolerance)
+    return rgb[0] < 15 and rgb[1] < 15 and rgb[2] < 15
+
 def reduce_colors(image: Image.Image, n_colors: int):
     # Ensure image is RGB
     image = image.convert('RGB')
@@ -95,7 +107,7 @@ def count_unique_colors(image: Image.Image) -> int:
         image = image.convert('RGB')
     return len(image.getcolors(maxcolors=1000000))
 
-def generate_svg_potrace(labels: np.ndarray, palette: list, width: int, height: int, update_progress=None) -> str:
+def generate_svg_potrace(labels: np.ndarray, palette: list, width: int, height: int, update_progress=None, exclude_white=False, exclude_black=False) -> str:
     parts = []
     # Add SVG header
     parts.append(f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">')
@@ -110,6 +122,13 @@ def generate_svg_potrace(labels: np.ndarray, palette: list, width: int, height: 
             # Progress from 10% to 90%
             progress = 10 + int((idx / total_colors) * 80)
             update_progress(progress, f"Vettorializzazione colore {idx + 1}/{total_colors}")
+
+        # Check if we need to exclude this color
+        rgb = hex_to_rgb(hex_color)
+        if exclude_white and is_white(rgb):
+            continue
+        if exclude_black and is_black(rgb):
+            continue
 
         # Create mask for this color based on labels (much faster than RGB comparison)
         # shape: (height, width) - boolean
@@ -171,7 +190,7 @@ def generate_svg_potrace(labels: np.ndarray, palette: list, width: int, height: 
     parts.append('</svg>')
     return "".join(parts)
 
-def process_image_task(task_id: str, image_bytes: bytes, colors: int, smoothing: str):
+def process_image_task(task_id: str, image_bytes: bytes, colors: int, smoothing: str, exclude_white: bool, exclude_black: bool):
     try:
         tasks[task_id] = {"status": "processing", "progress": 0, "message": "Starting..."}
         
@@ -230,7 +249,7 @@ def process_image_task(task_id: str, image_bytes: bytes, colors: int, smoothing:
             tasks[task_id].update({"progress": p, "message": msg})
 
         # 3. Vectorize
-        svg_content = generate_svg_potrace(labels, palette, processed_image.width, processed_image.height, update_progress=update_progress)
+        svg_content = generate_svg_potrace(labels, palette, processed_image.width, processed_image.height, update_progress=update_progress, exclude_white=exclude_white, exclude_black=exclude_black)
 
         tasks[task_id] = {
             "status": "completed",
@@ -255,7 +274,9 @@ async def convert_image(
     background_tasks: BackgroundTasks, 
     file: UploadFile = File(...), 
     colors: int = Form(...),
-    smoothing: str = Form("light")
+    smoothing: str = Form("light"),
+    excludeWhite: bool = Form(False),
+    excludeBlack: bool = Form(False)
 ):
     # Create unique task ID
     task_id = str(uuid.uuid4())
@@ -264,7 +285,7 @@ async def convert_image(
     image_bytes = await file.read()
     
     # Start background task
-    background_tasks.add_task(process_image_task, task_id, image_bytes, colors, smoothing)
+    background_tasks.add_task(process_image_task, task_id, image_bytes, colors, smoothing, excludeWhite, excludeBlack)
     
     return {"task_id": task_id}
 
