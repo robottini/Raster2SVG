@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    let currentLang = 'it';
+    let currentLang = 'en';
 
     // Language Functions
     function setLanguage(lang) {
@@ -84,16 +84,169 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update document title if needed, but it's not data-i18n
         document.title = lang === 'it' ? 'Raster to SVG Converter' : 'Raster to SVG Converter';
+        document.documentElement.lang = lang;
     }
 
     langIt.addEventListener('click', () => setLanguage('it'));
     langEn.addEventListener('click', () => setLanguage('en'));
+    setLanguage('en');
 
     let selectedFile = null;
+    let selectedFilePath = null;
     let currentSvgContent = null;
 
-    // Handle pywebview download (Desktop App)
-    downloadBtn.addEventListener('click', (e) => {
+    const getTauri = () => window.__TAURI__;
+    const isTauriDesktop = () => Boolean(getTauri() && getTauri().core && getTauri().core.invoke);
+    const isPywebviewDesktop = () => Boolean(window.pywebview);
+    const tauriInvoke = (command, args = {}) => getTauri().core.invoke(command, args);
+
+    function detectMimeType(filename) {
+        const filenameLower = filename.toLowerCase();
+        if (filenameLower.endsWith('.png')) return 'image/png';
+        if (filenameLower.endsWith('.gif')) return 'image/gif';
+        if (filenameLower.endsWith('.bmp')) return 'image/bmp';
+        if (filenameLower.endsWith('.webp')) return 'image/webp';
+        return 'image/jpeg';
+    }
+
+    function fileFromBase64(result) {
+        const byteCharacters = atob(result.data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const mimeType = detectMimeType(result.filename);
+        const blob = new Blob([byteArray], { type: mimeType });
+        return new File([blob], result.filename, { type: mimeType });
+    }
+
+    function defaultSvgFilename() {
+        if (!selectedFile) return 'converted.svg';
+        return `${selectedFile.name.replace(/\.[^/.]+$/, '')}.svg`;
+    }
+
+    function defaultSvgPath() {
+        const filename = defaultSvgFilename();
+        if (!selectedFilePath) return filename;
+
+        const separatorIndex = Math.max(selectedFilePath.lastIndexOf('/'), selectedFilePath.lastIndexOf('\\'));
+        if (separatorIndex < 0) return filename;
+
+        return `${selectedFilePath.slice(0, separatorIndex + 1)}${filename}`;
+    }
+
+    function updateProgress(progress, message) {
+        const progressBar = document.getElementById('progressBar');
+        const progressPercentage = document.getElementById('progressPercentage');
+        const loadingStatus = document.getElementById('loadingStatus');
+        progressBar.style.width = `${progress}%`;
+        progressPercentage.textContent = `${progress}%`;
+        if (message) loadingStatus.textContent = message;
+    }
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function openImageWithTauri() {
+        const dialog = getTauri() && getTauri().dialog;
+        if (!dialog || !dialog.open) {
+            throw new Error('Tauri dialog plugin is not available');
+        }
+
+        const selectedPath = await dialog.open({
+            multiple: false,
+            directory: false,
+            title: 'Open Image',
+            filters: [
+                {
+                    name: 'Image Files',
+                    extensions: ['png', 'jpg', 'jpeg', 'bmp', 'webp', 'gif']
+                }
+            ]
+        });
+
+        if (!selectedPath) return;
+
+        const filePath = Array.isArray(selectedPath) ? selectedPath[0] : selectedPath;
+        const result = await tauriInvoke('read_image_file', { path: filePath });
+        const file = fileFromBase64(result);
+        handleFileSelect(file, { path: result.path || filePath });
+    }
+
+    async function saveSvgWithTauri() {
+        if (!currentSvgContent) return;
+
+        const dialog = getTauri() && getTauri().dialog;
+        if (!dialog || !dialog.save) {
+            throw new Error('Tauri dialog plugin is not available');
+        }
+
+        const savePath = await dialog.save({
+            title: 'Save SVG',
+            defaultPath: defaultSvgPath(),
+            filters: [
+                {
+                    name: 'SVG Files',
+                    extensions: ['svg']
+                }
+            ]
+        });
+
+        if (!savePath) return;
+        await tauriInvoke('save_svg_file', {
+            path: savePath,
+            content: currentSvgContent
+        });
+    }
+
+    async function convertWithTauri() {
+        const smoothingMode = document.querySelector('input[name="smoothing"]:checked').value;
+        const excludeWhite = document.getElementById('excludeWhite').checked;
+        const excludeBlack = document.getElementById('excludeBlack').checked;
+
+        updateProgress(12, 'Reading image locally...');
+        await wait(120);
+        updateProgress(42, 'Reducing colors with Rust K-Means...');
+
+        const result = selectedFilePath
+            ? await tauriInvoke('convert_image_quantized', {
+                path: selectedFilePath,
+                colors: Number(colorSlider.value),
+                smoothing: smoothingMode,
+                excludeWhite,
+                excludeBlack
+            })
+            : await tauriInvoke('convert_image_placeholder', {
+                fileName: selectedFile ? selectedFile.name : 'image',
+                colors: Number(colorSlider.value),
+                smoothing: smoothingMode,
+                excludeWhite,
+                excludeBlack
+            });
+
+        await wait(120);
+        updateProgress(78, selectedFilePath ? 'Rendering quantized SVG preview...' : 'Rendering SVG preview...');
+        await wait(120);
+        updateProgress(100, 'Done');
+        finishConversion(result);
+    }
+
+    // Handle desktop downloads.
+    downloadBtn.addEventListener('click', async (e) => {
+        if (isTauriDesktop()) {
+            e.preventDefault();
+            try {
+                await saveSvgWithTauri();
+            } catch (error) {
+                console.error(error);
+                const msg = translations[currentLang].errorMsg || "Error";
+                alert(`${msg}: ${error.message}`);
+            }
+            return;
+        }
+
         if (window.pywebview) {
             e.preventDefault();
             if (currentSvgContent) {
@@ -105,8 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Exit button handler
     if (exitBtn) {
-        exitBtn.addEventListener('click', () => {
-            if (window.pywebview) {
+        exitBtn.addEventListener('click', async () => {
+            if (isTauriDesktop()) {
+                await tauriInvoke('close_app');
+            } else if (window.pywebview) {
                 window.pywebview.api.close_app();
             }
         });
@@ -117,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (exitBtn) exitBtn.classList.remove('hidden');
     };
 
-    if (window.pywebview) {
+    if (isTauriDesktop() || window.pywebview) {
         showExitBtn();
     } else {
         window.addEventListener('pywebviewready', showExitBtn);
@@ -126,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle File Selection
     imageInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files[0]) {
-            handleFileSelect(e.target.files[0]);
+            handleFileSelect(e.target.files[0], { path: null });
         }
     });
 
@@ -134,46 +289,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadButton = document.querySelector('.custom-file-upload');
     if (uploadButton) {
         uploadButton.addEventListener('click', (e) => {
-            if (window.pywebview) {
+            if (isTauriDesktop()) {
+                e.preventDefault();
+                e.stopPropagation();
+                openImageWithTauri().catch(error => {
+                    console.error(error);
+                    const msg = translations[currentLang].errorMsg || "Error";
+                    alert(`${msg}: ${error.message}`);
+                });
+            } else if (window.pywebview) {
                 e.preventDefault();
                 e.stopPropagation();
                 
                 window.pywebview.api.open_image().then(result => {
                     if (result) {
-                        // Convert base64 to Blob/File
-                        const byteCharacters = atob(result.data);
-                        const byteNumbers = new Array(byteCharacters.length);
-                        for (let i = 0; i < byteCharacters.length; i++) {
-                            byteNumbers[i] = byteCharacters.charCodeAt(i);
-                        }
-                        const byteArray = new Uint8Array(byteNumbers);
-                        // Detect MIME type based on filename extension
-                        let mimeType = 'image/jpeg';
-                        const filenameLower = result.filename.toLowerCase();
-                        if (filenameLower.endsWith('.png')) {
-                            mimeType = 'image/png';
-                        } else if (filenameLower.endsWith('.gif')) {
-                            mimeType = 'image/gif';
-                        } else if (filenameLower.endsWith('.bmp')) {
-                            mimeType = 'image/bmp';
-                        } else if (filenameLower.endsWith('.webp')) {
-                            mimeType = 'image/webp';
-                        }
-                        const blob = new Blob([byteArray], { type: mimeType });
-                        
-                        // Create File object
-                        const file = new File([blob], result.filename, { type: mimeType });
-                        
-                        // Handle as if selected via input
-                        handleFileSelect(file);
+                        const file = fileFromBase64(result);
+                        handleFileSelect(file, { path: null });
                     }
                 });
             }
         });
     }
 
-    function handleFileSelect(file) {
+    function handleFileSelect(file, options = {}) {
         selectedFile = file;
+        selectedFilePath = options.path || null;
         fileName.textContent = selectedFile.name;
         convertBtn.disabled = false;
         
@@ -214,6 +354,19 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBar.style.width = '0%';
         progressPercentage.textContent = '0%';
         loadingStatus.textContent = translations[currentLang].processing;
+
+        if (isTauriDesktop()) {
+            try {
+                await convertWithTauri();
+            } catch (error) {
+                console.error(error);
+                const msg = translations[currentLang].errorMsg || "Error";
+                alert(`${msg}: ${error.message}`);
+                loading.classList.add('hidden');
+                convertBtn.disabled = false;
+            }
+            return;
+        }
 
         const formData = new FormData();
         formData.append('file', selectedFile);

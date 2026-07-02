@@ -1,0 +1,2 @@
+# Legacy Python desktop shell.
+pywebview

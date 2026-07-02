@@ -1,0 +1,36 @@
+{
+  "case": {
+    "name": "flat_shapes_no_white_6",
+    "fixture": "flat_shapes",
+    "colors": 6,
+    "smoothing": "light",
+    "exclude_white": true,
+    "exclude_black": false
+  },
+  "fixture": {
+    "name": "flat_shapes",
+    "path": "tests/fixtures/baseline/flat_shapes.png",
+    "width": 128,
+    "height": 96,
+    "sha256": "d0c790515c5d925ed408d9090471efb4f0c6a170387baaca7036d66a633dc814"
+  },
+  "result": {
+    "svg_path": "tests/baseline/reference/flat_shapes_no_white_6.svg",
+    "palette_path": "tests/baseline/reference/flat_shapes_no_white_6.palette.json",
+    "svg_sha256": "75313329a4643c0bc5fd5e6815a3ea6f0eed2dd5e88d79e436ae3d5c0ff878eb",
+    "svg_bytes": 5380,
+    "path_count": 7,
+    "palette": [
+      "#feffff",
+      "#e63845",
+      "#457b9c",
+      "#111010",
+      "#f4a160",
+      "#299c8f"
+    ],
+    "palette_size": 6
+  },
+  "runtime": {
+    "duration_seconds": 0.0222
+  }
+}

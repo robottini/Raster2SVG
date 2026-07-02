@@ -1,0 +1,36 @@
+{
+  "case": {
+    "name": "flat_shapes_light_6",
+    "fixture": "flat_shapes",
+    "colors": 6,
+    "smoothing": "light",
+    "exclude_white": false,
+    "exclude_black": false
+  },
+  "fixture": {
+    "name": "flat_shapes",
+    "path": "tests/fixtures/baseline/flat_shapes.png",
+    "width": 128,
+    "height": 96,
+    "sha256": "d0c790515c5d925ed408d9090471efb4f0c6a170387baaca7036d66a633dc814"
+  },
+  "result": {
+    "svg_path": "tests/baseline/reference/flat_shapes_light_6.svg",
+    "palette_path": "tests/baseline/reference/flat_shapes_light_6.palette.json",
+    "svg_sha256": "251fae04cef72db4bfbb448b8cee7b74d27a097d4c781d91e56dac16db8c7e5a",
+    "svg_bytes": 8565,
+    "path_count": 8,
+    "palette": [
+      "#feffff",
+      "#e63845",
+      "#457b9c",
+      "#111010",
+      "#f4a160",
+      "#299c8f"
+    ],
+    "palette_size": 6
+  },
+  "runtime": {
+    "duration_seconds": 0.1091
+  }
+}

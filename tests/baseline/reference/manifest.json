@@ -1,0 +1,100 @@
+{
+  "description": "Legacy Python baseline for RasterSVG migration.",
+  "engine": {
+    "entrypoint": "backend.main.process_image_task",
+    "max_resize_px": 1000,
+    "potrace_trace": {
+      "turdsize": 4,
+      "alphamax": 1
+    }
+  },
+  "fixtures": [
+    {
+      "name": "flat_shapes",
+      "path": "tests/fixtures/baseline/flat_shapes.png",
+      "width": 128,
+      "height": 96,
+      "sha256": "d0c790515c5d925ed408d9090471efb4f0c6a170387baaca7036d66a633dc814"
+    },
+    {
+      "name": "poster_gradient",
+      "path": "tests/fixtures/baseline/poster_gradient.png",
+      "width": 112,
+      "height": 88,
+      "sha256": "ab3cbf637c4f12cb968fcd79a57f6ce54fc8b06998160532f07d993344a96d3e"
+    },
+    {
+      "name": "icon_marks",
+      "path": "tests/fixtures/baseline/icon_marks.png",
+      "width": 96,
+      "height": 96,
+      "sha256": "b530f6dec3d9045e60b26ef676bb583713a7dbda524917dd7f63332816841351"
+    }
+  ],
+  "cases": [
+    {
+      "name": "flat_shapes_light_6",
+      "fixture": "flat_shapes",
+      "colors": 6,
+      "smoothing": "light",
+      "exclude_white": false,
+      "exclude_black": false,
+      "svg_path": "tests/baseline/reference/flat_shapes_light_6.svg",
+      "palette_path": "tests/baseline/reference/flat_shapes_light_6.palette.json",
+      "metadata_path": "tests/baseline/reference/flat_shapes_light_6.metadata.json",
+      "svg_sha256": "251fae04cef72db4bfbb448b8cee7b74d27a097d4c781d91e56dac16db8c7e5a",
+      "svg_bytes": 8565,
+      "path_count": 8,
+      "palette_size": 6,
+      "duration_seconds": 0.1091
+    },
+    {
+      "name": "flat_shapes_no_white_6",
+      "fixture": "flat_shapes",
+      "colors": 6,
+      "smoothing": "light",
+      "exclude_white": true,
+      "exclude_black": false,
+      "svg_path": "tests/baseline/reference/flat_shapes_no_white_6.svg",
+      "palette_path": "tests/baseline/reference/flat_shapes_no_white_6.palette.json",
+      "metadata_path": "tests/baseline/reference/flat_shapes_no_white_6.metadata.json",
+      "svg_sha256": "75313329a4643c0bc5fd5e6815a3ea6f0eed2dd5e88d79e436ae3d5c0ff878eb",
+      "svg_bytes": 5380,
+      "path_count": 7,
+      "palette_size": 6,
+      "duration_seconds": 0.0222
+    },
+    {
+      "name": "poster_gradient_aggressive_8",
+      "fixture": "poster_gradient",
+      "colors": 8,
+      "smoothing": "aggressive",
+      "exclude_white": false,
+      "exclude_black": false,
+      "svg_path": "tests/baseline/reference/poster_gradient_aggressive_8.svg",
+      "palette_path": "tests/baseline/reference/poster_gradient_aggressive_8.palette.json",
+      "metadata_path": "tests/baseline/reference/poster_gradient_aggressive_8.metadata.json",
+      "svg_sha256": "e8c5ea577b9a66d490de40b24342200640bc19319d8963829c7802991f528d7f",
+      "svg_bytes": 8977,
+      "path_count": 9,
+      "palette_size": 8,
+      "duration_seconds": 0.0315
+    },
+    {
+      "name": "icon_marks_no_black_7",
+      "fixture": "icon_marks",
+      "colors": 7,
+      "smoothing": "light",
+      "exclude_white": false,
+      "exclude_black": true,
+      "svg_path": "tests/baseline/reference/icon_marks_no_black_7.svg",
+      "palette_path": "tests/baseline/reference/icon_marks_no_black_7.palette.json",
+      "metadata_path": "tests/baseline/reference/icon_marks_no_black_7.metadata.json",
+      "svg_sha256": "850989938acd119864ee0da1d1e89cea427a4d0bed5f242032fec73b0df51248",
+      "svg_bytes": 9012,
+      "path_count": 7,
+      "palette_size": 7,
+      "duration_seconds": 0.033
+    }
+  ]
+}

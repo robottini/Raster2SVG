@@ -24,12 +24,39 @@ MANIFEST
 
 # Virtual Env
 venv/
+.venv/
 env/
 ENV/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Logs and local caches
+*.log
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node/Tauri future workspace
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+src-tauri/target/
+
+# Desktop/package artifacts
+*.app/
+*.dmg
+*.pkg
+*.msi
+*.exe
+*.zip
+*.tar.gz
 
 # Project
 backend/temp_mask.png

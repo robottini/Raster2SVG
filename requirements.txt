@@ -1,9 +1,10 @@
-fastapi
-uvicorn
-python-multipart
-pillow
-numpy
-scikit-learn
-scikit-image
-opencv-python-headless
-potracer
+# Legacy Python all-in-one requirements.
+#
+# Keep this file for backwards compatibility with the existing FastAPI and
+# pywebview application. New cross-platform desktop work will move toward
+# Tauri/Rust and should not add new Python runtime dependencies here unless the
+# legacy app actually needs them.
+
+-r requirements-backend.txt
+-r requirements-desktop.txt
+-r requirements-dev.txt

@@ -1,0 +1,37 @@
+{
+  "case": {
+    "name": "icon_marks_no_black_7",
+    "fixture": "icon_marks",
+    "colors": 7,
+    "smoothing": "light",
+    "exclude_white": false,
+    "exclude_black": true
+  },
+  "fixture": {
+    "name": "icon_marks",
+    "path": "tests/fixtures/baseline/icon_marks.png",
+    "width": 96,
+    "height": 96,
+    "sha256": "b530f6dec3d9045e60b26ef676bb583713a7dbda524917dd7f63332816841351"
+  },
+  "result": {
+    "svg_path": "tests/baseline/reference/icon_marks_no_black_7.svg",
+    "palette_path": "tests/baseline/reference/icon_marks_no_black_7.palette.json",
+    "svg_sha256": "850989938acd119864ee0da1d1e89cea427a4d0bed5f242032fec73b0df51248",
+    "svg_bytes": 9012,
+    "path_count": 7,
+    "palette": [
+      "#fffffe",
+      "#111110",
+      "#ffd066",
+      "#06d5a0",
+      "#ee476f",
+      "#108cb1",
+      "#f7bda5"
+    ],
+    "palette_size": 7
+  },
+  "runtime": {
+    "duration_seconds": 0.033
+  }
+}

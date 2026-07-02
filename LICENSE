@@ -1,0 +1,21 @@
+SPDX-License-Identifier: GPL-2.0-or-later
+
+RasterSVG is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 2 of the License, or (at your option) any later
+version.
+
+RasterSVG is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+This repository uses the SPDX identifier GPL-2.0-or-later because the current
+legacy implementation depends on `potracer`, a Python port of Potrace licensed
+as GPLv2+, and the target native implementation is planned around Potrace or a
+Potrace-compatible integration.
+
+The full GNU General Public License version 2 text is available from the Free
+Software Foundation:
+
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+

@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raster to SVG Converter</title>
-    <link rel="stylesheet" href="/static/style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
     <div class="main-layout">
         <div class="viewer-area">
             <div id="imageContainer" class="image-container">
-                <div id="placeholderText" class="placeholder-text" data-i18n="placeholder">Carica un'immagine per iniziare</div>
+                <div id="placeholderText" class="placeholder-text" data-i18n="placeholder">Upload an image to start</div>
                 <!-- Images will be injected here -->
             </div>
             
             <div id="loading" class="hidden">
                 <div class="spinner"></div>
-                <p id="loadingStatus" data-i18n="processing">Elaborazione in corso...</p>
+                <p id="loadingStatus" data-i18n="processing">Processing...</p>
                 <div class="progress-container">
                     <div id="progressBar" class="progress-bar"></div>
                 </div>
@@ -26,58 +26,58 @@
 
         <div class="sidebar">
             <div class="sidebar-header">
-                <h2 data-i18n="appTitle">Immagine -> SVG</h2>
+                <h2 data-i18n="appTitle">Image -> SVG</h2>
                 <div class="language-switcher">
-                    <button id="langIt" class="lang-btn active">IT</button>
-                    <button id="langEn" class="lang-btn">EN</button>
+                    <button id="langIt" class="lang-btn">IT</button>
+                    <button id="langEn" class="lang-btn active">EN</button>
                 </div>
             </div>
             
             <div class="sidebar-content">
                 <div class="control-group">
                     <label for="imageInput" class="custom-file-upload" data-i18n="chooseImage">
-                        Scegli Immagine
+                        Choose Image
                     </label>
                     <input type="file" id="imageInput" accept="image/jpeg, image/png, image/gif">
-                    <div id="fileName" class="file-name" data-i18n="noFile">Nessun file</div>
+                    <div id="fileName" class="file-name" data-i18n="noFile">No file selected</div>
                 </div>
 
                 <div class="control-group">
-                    <label for="colorSlider"><span data-i18n="colorsTitle">Numero dei colori SVG</span>: <span id="colorValue">12</span></label>
+                    <label for="colorSlider"><span data-i18n="colorsTitle">Number of SVG Colors</span>: <span id="colorValue">12</span></label>
                     <input type="range" id="colorSlider" min="1" max="30" value="12">
                 </div>
 
                 <div class="control-group">
-                    <label style="margin-bottom: 8px; display: block;" data-i18n="smoothingTitle">Modalità Smoothing</label>
+                    <label style="margin-bottom: 8px; display: block;" data-i18n="smoothingTitle">Smoothing Mode</label>
                     <div style="display: flex; gap: 15px;">
                         <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
                             <input type="radio" name="smoothing" value="light" checked>
-                            <span data-i18n="smoothingLight">Leggero</span>
+                            <span data-i18n="smoothingLight">Light</span>
                         </label>
                         <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
                             <input type="radio" name="smoothing" value="aggressive">
-                            <span data-i18n="smoothingAggressive">Aggressivo</span>
+                            <span data-i18n="smoothingAggressive">Aggressive</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <label style="margin-bottom: 8px; display: block;" data-i18n="excludeTitle">Escludi Colore</label>
+                    <label style="margin-bottom: 8px; display: block;" data-i18n="excludeTitle">Exclude Color</label>
                     <div style="display: flex; gap: 15px;">
                         <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
                             <input type="checkbox" id="excludeWhite">
-                            <span data-i18n="excludeWhite">Bianco</span>
+                            <span data-i18n="excludeWhite">White</span>
                         </label>
                         <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
                             <input type="checkbox" id="excludeBlack">
-                            <span data-i18n="excludeBlack">Nero</span>
+                            <span data-i18n="excludeBlack">Black</span>
                         </label>
                     </div>
                 </div>
 
-                <button id="convertBtn" disabled data-i18n="convertBtn">Converti in SVG</button>
-                <a id="downloadBtn" class="button disabled" download="converted.svg" data-i18n="downloadBtn">Scarica SVG</a>
-                <button id="exitBtn" class="button hidden" data-i18n="exitBtn">ESCI</button>
+                <button id="convertBtn" disabled data-i18n="convertBtn">Convert to SVG</button>
+                <a id="downloadBtn" class="button disabled" download="converted.svg" data-i18n="downloadBtn">Download SVG</a>
+                <button id="exitBtn" class="button hidden" data-i18n="exitBtn">EXIT</button>
 
                 <div id="paletteContainer" class="hidden" style="margin-top: 40px;">
                     <h3 data-i18n="paletteTitle">Palette</h3>
@@ -96,6 +96,6 @@
         </div>
     </div>
 
-    <script src="/static/script.js?v=4"></script>
+    <script src="script.js?v=4"></script>
 </body>
 </html>

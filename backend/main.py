@@ -53,6 +53,14 @@ app.mount("/static", StaticFiles(directory=FRONTEND_PATH), name="static")
 async def read_index():
     return FileResponse(os.path.join(FRONTEND_PATH, "index.html"))
 
+@app.get("/style.css", include_in_schema=False)
+async def read_style():
+    return FileResponse(os.path.join(FRONTEND_PATH, "style.css"))
+
+@app.get("/script.js", include_in_schema=False)
+async def read_script():
+    return FileResponse(os.path.join(FRONTEND_PATH, "script.js"))
+
 def resize_image_if_needed(image: Image.Image, max_size: int = 1000) -> Image.Image:
     width, height = image.size
     if max(width, height) > max_size:

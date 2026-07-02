@@ -1,0 +1,38 @@
+{
+  "case": {
+    "name": "poster_gradient_aggressive_8",
+    "fixture": "poster_gradient",
+    "colors": 8,
+    "smoothing": "aggressive",
+    "exclude_white": false,
+    "exclude_black": false
+  },
+  "fixture": {
+    "name": "poster_gradient",
+    "path": "tests/fixtures/baseline/poster_gradient.png",
+    "width": 112,
+    "height": 88,
+    "sha256": "ab3cbf637c4f12cb968fcd79a57f6ce54fc8b06998160532f07d993344a96d3e"
+  },
+  "result": {
+    "svg_path": "tests/baseline/reference/poster_gradient_aggressive_8.svg",
+    "palette_path": "tests/baseline/reference/poster_gradient_aggressive_8.palette.json",
+    "svg_sha256": "e8c5ea577b9a66d490de40b24342200640bc19319d8963829c7802991f528d7f",
+    "svg_bytes": 8977,
+    "path_count": 9,
+    "palette": [
+      "#b5349b",
+      "#ffcc00",
+      "#1d3557",
+      "#06d5a0",
+      "#3a3497",
+      "#447e99",
+      "#7b3696",
+      "#aa829c"
+    ],
+    "palette_size": 8
+  },
+  "runtime": {
+    "duration_seconds": 0.0315
+  }
+}
