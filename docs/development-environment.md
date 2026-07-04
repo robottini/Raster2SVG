@@ -80,7 +80,6 @@ Measured output after Step 9 packaging configuration:
 
 The build cache is ignored by Git and is not part of the release package.
 
-The `.dmg` bundle succeeded once before release size optimization, then failed
-in `bundle_dmg.sh` after enabling LTO/strip. The release workflow currently
-ships macOS `.app` bundles and a Windows NSIS installer; DMG packaging remains
-optional future work.
+Tauri's built-in DMG target failed in `bundle_dmg.sh` in this environment, so
+the project builds the `.app` bundle and wraps it in a simple DMG with
+`tools/package_macos_dmg.sh`.

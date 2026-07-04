@@ -2,7 +2,16 @@
 
 All notable changes to RasterSVG will be documented in this file.
 
-## 0.1.1 - Unreleased
+## 0.1.2 - Unreleased
+
+### Changed
+
+- Switched macOS release packaging to `.dmg` files for Apple Silicon and Intel
+  builds.
+- Updated the release workflow to publish macOS DMG and Windows installer
+  assets after all package jobs complete.
+
+## 0.1.1 - 2026-07-04
 
 ### Fixed
 
@@ -18,7 +27,7 @@ Initial native desktop release candidate.
 - Tauri 2 desktop application using the existing static frontend.
 - Native Rust image pipeline for decode, resize, smoothing and K-Means color
   quantization.
-- Vendored Potrace 1.16 core integration for multilayer SVG path tracing.
+- Vendored Potrace 1.16 core integration for multi-color SVG path tracing.
 - Native file open/save dialogs.
 - English default language on startup, with Italian still available from the
   language switcher.

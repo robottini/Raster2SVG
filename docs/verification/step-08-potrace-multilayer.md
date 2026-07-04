@@ -7,7 +7,7 @@
 - Compiled Potrace from the Tauri build script through the Rust `cc` crate.
 - Added a Rust FFI bridge to Potrace's curve API.
 - Converted each quantized palette label into a Potrace bitmap layer.
-- Generated a layered SVG with one filled `<path>` per traced color.
+- Generated a flat SVG with filled `<path>` elements for traced colors.
 - Updated the Tauri conversion command so the app now returns real Potrace SVG
   output instead of the temporary quantized preview.
 
@@ -22,7 +22,7 @@ Run:
 Expected result:
 
 - all Rust tests pass;
-- `potrace_svg_contains_layered_paths` is present in the output;
+- `potrace_svg_contains_flat_paths` is present in the output;
 - no Python virtual environment is required.
 
 ## How to Verify from the App
@@ -37,8 +37,8 @@ Expected result:
 Expected result:
 
 - the saved SVG contains `<path>` elements, not embedded raster data;
-- the SVG comment starts with `RasterSVG Potrace multilayer output`;
-- enabling white/black exclusion removes those color layers when detected.
+- the SVG comment starts with `RasterSVG Potrace flat path output`;
+- enabling white/black exclusion removes those color regions when detected.
 
 ## Verified Locally
 

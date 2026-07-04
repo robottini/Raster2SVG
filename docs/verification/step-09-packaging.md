@@ -47,7 +47,7 @@ Expected result:
 1. Publish the repository to GitHub.
 2. Open the Actions tab.
 3. Run `Release Desktop Packages` manually, or push a tag such as `v0.1.0`.
-4. Confirm that a draft release is created.
+4. Confirm that the release is published after all package jobs complete.
 5. Confirm that macOS and Windows artifacts are attached.
 
 Windows artifacts cannot be produced on this macOS workstation without a

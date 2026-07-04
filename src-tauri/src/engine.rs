@@ -246,7 +246,7 @@ pub fn potrace_svg(
             image.width, image.height, image.width, image.height
         ),
         format!(
-            r#"<!-- RasterSVG Potrace multilayer output; source="{}"; smoothing="{}" -->"#,
+            r#"<!-- RasterSVG Potrace flat path output; source="{}"; smoothing="{}" -->"#,
             escape_xml(source_name),
             escape_xml(smoothing)
         ),
@@ -755,7 +755,7 @@ mod tests {
     }
 
     #[test]
-    fn potrace_svg_contains_layered_paths() {
+    fn potrace_svg_contains_flat_paths() {
         let fixture = fixture_path("flat_shapes.png");
         let bytes = std::fs::read(fixture).expect("fixture should be readable");
         let quantized = quantize_image_bytes(&bytes, 6, "light").expect("fixture should quantize");
@@ -765,7 +765,7 @@ mod tests {
         assert!(svg.starts_with("<svg "));
         assert!(svg.ends_with("</svg>"));
         assert!(svg.contains("<path "));
-        assert!(svg.contains("RasterSVG Potrace multilayer output"));
+        assert!(svg.contains("RasterSVG Potrace flat path output"));
     }
 
     #[test]

@@ -19,16 +19,19 @@ jobs:
         include:
           - label: macOS Apple Silicon
             platform: macos-latest
-            rust-targets: aarch64-apple-darwin
-            args: --target aarch64-apple-darwin --bundles app
+            kind: macos
+            rust_targets: aarch64-apple-darwin
+            artifact_name: package-macos-aarch64
           - label: macOS Intel
             platform: macos-latest
-            rust-targets: x86_64-apple-darwin
-            args: --target x86_64-apple-darwin --bundles app
+            kind: macos
+            rust_targets: x86_64-apple-darwin
+            artifact_name: package-macos-x64
           - label: Windows x64
             platform: windows-latest
-            rust-targets: ""
-            args: --bundles nsis
+            kind: windows
+            rust_targets: ""
+            artifact_name: package-windows-x64
 
     steps:
       - name: Checkout
@@ -44,14 +47,14 @@ jobs:
           cache: pnpm
 
       - name: Install Rust stable
-        if: matrix.rust-targets == ''
+        if: matrix.rust_targets == ''
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install Rust stable with target
-        if: matrix.rust-targets != ''
+        if: matrix.rust_targets != ''
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.rust-targets }}
+          targets: ${{ matrix.rust_targets }}
 
       - name: Cache Rust artifacts
         uses: swatinem/rust-cache@v2
@@ -64,18 +67,70 @@ jobs:
       - name: Run Rust tests
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
-      - name: Build and publish Tauri bundle
-        uses: tauri-apps/tauri-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: v__VERSION__
-          releaseName: RasterSVG v__VERSION__
-          releaseBody: |
-            RasterSVG desktop packages for macOS and Windows.
+      - name: Build macOS DMG
+        if: matrix.kind == 'macos'
+        run: bash tools/package_macos_dmg.sh ${{ matrix.rust_targets }}
 
-            The native app does not bundle Python or scientific Python
-            libraries. Windows uses the standard WebView2 runtime strategy.
-          releaseDraft: true
-          prerelease: false
-          args: ${{ matrix.args }}
+      - name: Build Windows installer
+        if: matrix.kind == 'windows'
+        run: pnpm exec tauri build --bundles nsis
+
+      - name: Upload macOS package artifact
+        if: matrix.kind == 'macos'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: src-tauri/target/${{ matrix.rust_targets }}/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+
+      - name: Upload Windows package artifact
+        if: matrix.kind == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: src-tauri/target/release/bundle/nsis/*setup.exe
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          TAG="v${VERSION}"
+          TITLE="RasterSVG ${TAG}"
+          NOTES_FILE="$(mktemp)"
+
+          printf '%s\n\n' "RasterSVG desktop packages for macOS and Windows." > "$NOTES_FILE"
+          printf '%s\n' "- macOS packages are DMG images." >> "$NOTES_FILE"
+          printf '%s\n' "- Windows uses the NSIS installer." >> "$NOTES_FILE"
+          printf '%s\n' "- The native app does not bundle Python or scientific Python libraries." >> "$NOTES_FILE"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" release-assets/* --clobber
+            gh release edit "$TAG" --title "$TITLE" --notes-file "$NOTES_FILE" --draft=false --latest
+          else
+            gh release create "$TAG" release-assets/* --target "$GITHUB_SHA" --title "$TITLE" --notes-file "$NOTES_FILE" --latest
+          fi

@@ -147,7 +147,7 @@ Verifica:
 - controllare differenze visive rispetto alla baseline;
 - verificare che bianco/nero vengano esclusi quando richiesto.
 
-### Step 8 - Tracciamento Potrace e SVG multilayer
+### Step 8 - Tracciamento Potrace e SVG multi-colore
 
 Stato: completato.
 

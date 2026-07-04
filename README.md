@@ -35,14 +35,14 @@ Compiled packages are available from the GitHub Releases page:
 
 Current compiled packages:
 
-- [Windows x64 installer](https://github.com/robottini/Raster2SVG/releases/download/v0.1.1/RasterSVG_0.1.1_x64-setup.exe)
-- [macOS Apple Silicon app archive](https://github.com/robottini/Raster2SVG/releases/download/v0.1.1/RasterSVG_0.1.1_aarch64.app.tar.gz)
-- [macOS Intel app archive](https://github.com/robottini/Raster2SVG/releases/download/v0.1.1/RasterSVG_0.1.1_x64.app.tar.gz)
+- [Windows x64 installer](https://github.com/robottini/Raster2SVG/releases/download/v0.1.2/RasterSVG_0.1.2_x64-setup.exe)
+- [macOS Apple Silicon DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.2/RasterSVG_0.1.2_aarch64.dmg)
+- [macOS Intel DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.2/RasterSVG_0.1.2_x64.dmg)
 
 Release packages are produced through GitHub Actions:
 
-- macOS Apple Silicon `.app`;
-- macOS Intel `.app`;
+- macOS Apple Silicon `.dmg`;
+- macOS Intel `.dmg`;
 - Windows x64 NSIS installer.
 
 The release workflow is defined in:
@@ -125,6 +125,18 @@ The output is:
 src-tauri/target/release/bundle/macos/RasterSVG.app
 ```
 
+To build a local macOS `.dmg` package:
+
+```bash
+pnpm run tauri:build:dmg
+```
+
+The output is:
+
+```text
+src-tauri/target/release/bundle/dmg/RasterSVG_<version>_<arch>.dmg
+```
+
 ## Legacy Python App
 
 The legacy Python app is retained for comparison, baseline generation and web
@@ -173,12 +185,12 @@ Before tagging a release:
 
 1. Run `pnpm install --frozen-lockfile`.
 2. Run `cargo test --manifest-path src-tauri/Cargo.toml`.
-3. Run `pnpm run tauri:build:app` on macOS.
+3. Run `pnpm run tauri:build:dmg` on macOS.
 4. Open the generated `.app` by double click.
 5. Convert a real image and save an SVG.
 6. Check the SVG contains vector `<path>` elements.
 7. Push a tag such as `v0.1.0`.
-8. Verify the draft release artifacts from GitHub Actions.
+8. Verify the release artifacts from GitHub Actions.
 
 The full checklist is in `docs/release-checklist.md`.
 

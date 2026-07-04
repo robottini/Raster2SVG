@@ -1,6 +1,6 @@
 {
   "name": "rastersvg",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "RasterSVG desktop shell and migration workspace.",
   "license": "GPL-2.0-or-later",
@@ -10,6 +10,7 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "tauri:build:app": "tauri build --bundles app",
+    "tauri:build:dmg": "bash tools/package_macos_dmg.sh",
     "legacy:serve": "python3 -m uvicorn backend.main:app --host 127.0.0.1 --port 8000",
     "baseline": "python3 tools/generate_legacy_baseline.py"
   },

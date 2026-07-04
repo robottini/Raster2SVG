@@ -9,13 +9,14 @@ Run from the repository root:
 ```bash
 pnpm install --frozen-lockfile
 cargo test --manifest-path src-tauri/Cargo.toml
-pnpm run tauri:build:app
+pnpm run tauri:build:dmg
 ```
 
 Check expected output:
 
 ```text
 src-tauri/target/release/bundle/macos/RasterSVG.app
+src-tauri/target/release/bundle/dmg/RasterSVG_<version>_<arch>.dmg
 ```
 
 Measure the local package:
@@ -28,7 +29,8 @@ du -sh src-tauri/target/release/bundle/macos/RasterSVG.app
 Current expected size:
 
 - release binary: about 3.4 MB;
-- macOS `.app`: about 3.7 MB.
+- macOS `.app`: about 3.7 MB;
+- macOS `.dmg`: about 2 MB.
 
 ## Manual App Check
 
@@ -71,10 +73,12 @@ Expected result:
    - macOS Apple Silicon;
    - macOS Intel;
    - Windows x64.
-5. Open the draft release.
-6. Confirm all expected artifacts are attached.
+5. Open the published release.
+6. Confirm all expected artifacts are attached:
+   - macOS Apple Silicon `.dmg`;
+   - macOS Intel `.dmg`;
+   - Windows x64 `.exe`.
 7. Edit release notes if needed.
-8. Publish the release.
 
 ## Optional Signing Work
 
@@ -85,4 +89,4 @@ Future release hardening:
 
 - Apple Developer ID signing and notarization;
 - Windows Authenticode signing;
-- optional DMG packaging for macOS.
+- Apple-styled DMG background and icon positioning.
