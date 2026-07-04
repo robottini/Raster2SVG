@@ -1,6 +1,9 @@
 # RasterSVG
 
-RasterSVG converts raster images into layered SVG files.
+RasterSVG converts raster images into compact vector SVG files made of filled
+paths.
+
+[Download compiled apps](https://github.com/robottini/Raster2SVG/releases/latest)
 
 The current primary app is a lightweight Tauri/Rust desktop application for
 macOS and Windows. It keeps the existing HTML/CSS/JavaScript interface, runs
@@ -15,11 +18,26 @@ or a virtual environment.
 - Resize large images to a maximum working edge of 1000 px.
 - Quantize colors with a deterministic K-Means pipeline.
 - Apply light or aggressive smoothing before tracing.
-- Exclude white or black layers when requested.
-- Trace each color layer through Potrace and export filled SVG paths.
+- Exclude white or black color regions when requested.
+- Trace each quantized color mask through Potrace and export filled SVG paths.
 - Save the SVG locally through native desktop dialogs.
 
+The exported SVG is a flat vector document. It does not create named SVG,
+Inkscape, Illustrator or Photoshop-style layers; vector editors will see a
+stack of filled `<path>` elements, usually one or more paths per traced color.
+
 ## Download and Release Builds
+
+Compiled packages are available from the GitHub Releases page:
+
+- [Latest release](https://github.com/robottini/Raster2SVG/releases/latest)
+- [All releases](https://github.com/robottini/Raster2SVG/releases)
+
+Current compiled packages:
+
+- [Windows x64 installer](https://github.com/robottini/Raster2SVG/releases/download/v0.1.1/RasterSVG_0.1.1_x64-setup.exe)
+- [macOS Apple Silicon app archive](https://github.com/robottini/Raster2SVG/releases/download/v0.1.1/RasterSVG_0.1.1_aarch64.app.tar.gz)
+- [macOS Intel app archive](https://github.com/robottini/Raster2SVG/releases/download/v0.1.1/RasterSVG_0.1.1_x64.app.tar.gz)
 
 Release packages are produced through GitHub Actions:
 
