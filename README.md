@@ -35,9 +35,9 @@ Compiled packages are available from the GitHub Releases page:
 
 Current compiled packages:
 
-- [Windows x64 installer](https://github.com/robottini/Raster2SVG/releases/download/v0.1.3/RasterSVG_0.1.3_x64-setup.exe)
-- [macOS Apple Silicon DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.3/RasterSVG_0.1.3_aarch64.dmg)
-- [macOS Intel DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.3/RasterSVG_0.1.3_x64.dmg)
+- [Windows x64 installer](https://github.com/robottini/Raster2SVG/releases/download/v0.1.4/RasterSVG_0.1.4_x64-setup.exe)
+- [macOS Apple Silicon DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.4/RasterSVG_0.1.4_aarch64.dmg)
+- [macOS Intel DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.4/RasterSVG_0.1.4_x64.dmg)
 
 Release packages are produced through GitHub Actions:
 
@@ -45,9 +45,28 @@ Release packages are produced through GitHub Actions:
 - macOS Intel `.dmg`;
 - Windows x64 NSIS installer.
 
-macOS release jobs require Apple Developer ID signing and notarization secrets
-before publishing, so GitHub downloads can pass Gatekeeper instead of appearing
-as damaged browser downloads.
+macOS release jobs publish ad-hoc signed DMGs when Apple Developer ID signing
+and notarization secrets are not configured. These unsigned packages are valid
+DMGs, but macOS Gatekeeper can still block browser downloads until the local
+quarantine attribute is removed. If Apple Developer ID secrets are configured,
+the same workflow signs and notarizes the DMGs.
+
+### macOS unsigned app
+
+When using the free, unsigned macOS build:
+
+1. Download the correct `.dmg` from the official GitHub release.
+2. Open the DMG and copy `RasterSVG.app` to `/Applications`.
+3. If macOS says the app is damaged, open Terminal and run:
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/RasterSVG.app
+   ```
+
+4. Open `RasterSVG.app` again from Applications.
+
+Only use this command for a DMG downloaded from this repository's official
+GitHub Releases page.
 
 The release workflow is defined in:
 
@@ -193,8 +212,8 @@ Before tagging a release:
 4. Open the generated `.app` by double click.
 5. Convert a real image and save an SVG.
 6. Check the SVG contains vector `<path>` elements.
-7. Confirm the macOS signing and notarization secrets are present in GitHub
-   Actions.
+7. For unsigned macOS releases, confirm the copied app opens after removing
+   quarantine with `xattr -dr com.apple.quarantine /Applications/RasterSVG.app`.
 8. Push a tag such as `v0.1.0`.
 9. Verify the release artifacts from GitHub Actions.
 

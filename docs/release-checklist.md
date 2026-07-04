@@ -60,9 +60,9 @@ Expected result:
 
 ## GitHub Release Check
 
-1. Confirm the macOS signing secrets are configured in GitHub Actions:
-   `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_ID`,
-   `APPLE_PASSWORD`, `APPLE_TEAM_ID` and `KEYCHAIN_PASSWORD`.
+1. Decide the macOS signing mode:
+   - without Apple secrets, the workflow publishes ad-hoc signed DMGs;
+   - with Apple Developer ID secrets, the workflow signs and notarizes DMGs.
 2. Push the repository to GitHub.
 3. Create a tag such as:
 
@@ -81,9 +81,18 @@ Expected result:
    - macOS Apple Silicon `.dmg`;
    - macOS Intel `.dmg`;
    - Windows x64 `.exe`.
-8. Download each macOS DMG from GitHub in a browser and open the copied app from
-   `/Applications` without removing quarantine manually.
-9. Edit release notes if needed.
+8. Download each macOS DMG from GitHub in a browser and copy the app to
+   `/Applications`.
+9. For ad-hoc signed DMGs, confirm macOS may show a damaged-app warning, then
+   verify the documented command opens the app:
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/RasterSVG.app
+   ```
+
+10. For signed and notarized DMGs, confirm the copied app opens from
+    `/Applications` without removing quarantine manually.
+11. Edit release notes if needed.
 
 ## Optional Signing Work
 

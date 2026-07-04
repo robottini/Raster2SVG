@@ -51,9 +51,9 @@ It runs on:
 The workflow uploads build artifacts from the matrix jobs, then publishes a
 GitHub release after all platform packages have been produced.
 
-macOS release jobs require Apple Developer ID signing and notarization secrets.
-If the secrets are missing, the macOS jobs fail before packaging so an unsigned
-DMG is not published by accident.
+macOS release jobs use Apple Developer ID signing and notarization when all
+Apple secrets are configured. If those secrets are missing, the workflow falls
+back to a valid ad-hoc signed DMG and publishes it with unsigned-app notes.
 
 ## Windows WebView2 Choice
 
@@ -76,10 +76,9 @@ If a fully offline Windows installer becomes mandatory, switch this to
 
 ## Signing and Notarization
 
-macOS release builds should be signed with a Developer ID Application
-certificate and notarized by Apple before publication. This is what allows
-Gatekeeper to accept a DMG downloaded from GitHub without reporting that the app
-is damaged.
+macOS release builds can be signed with a Developer ID Application certificate
+and notarized by Apple. This is the only path that allows Gatekeeper to accept a
+DMG downloaded from GitHub without warning that the app is damaged.
 
 Required GitHub repository secrets for macOS release jobs:
 
@@ -92,11 +91,12 @@ Required GitHub repository secrets for macOS release jobs:
 - `KEYCHAIN_PASSWORD`: temporary keychain password used only inside Actions.
 
 The `pnpm run tauri:build:dmg` path first lets Tauri build and sign the `.app`
-bundle, then creates a simple DMG that contains the signed app and an
-Applications shortcut. When `APPLE_SIGNING_IDENTITY`, `APPLE_ID`,
-`APPLE_PASSWORD` and `APPLE_TEAM_ID` are set, the script also signs and notarizes
-the DMG. Without a signing identity, it defaults to Tauri ad-hoc signing for
-local testing only.
+bundle, then creates a simple DMG that contains the app and an Applications
+shortcut. When `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD` and
+`APPLE_TEAM_ID` are set, the script also signs and notarizes the DMG. Without a
+signing identity, it defaults to Tauri ad-hoc signing and the release notes tell
+macOS users how to remove the browser quarantine attribute after copying the app
+to Applications.
 
 Windows release builds are still unsigned, so Windows SmartScreen may warn until
 a Windows code-signing certificate is added.

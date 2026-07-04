@@ -67,7 +67,7 @@ jobs:
       - name: Run Rust tests
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
-      - name: Validate macOS signing secrets
+      - name: Configure macOS signing mode
         if: matrix.kind == 'macos'
         shell: bash
         env:
@@ -78,14 +78,21 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          missing=0
+          missing=()
           for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID KEYCHAIN_PASSWORD; do
             if [[ -z "${!name:-}" ]]; then
-              echo "::error::Missing GitHub secret: $name"
-              missing=1
+              missing+=("$name")
             fi
           done
-          exit "$missing"
+
+          if [[ "${#missing[@]}" -eq 0 ]]; then
+            echo "MACOS_SIGNING_MODE=developer-id" >> "$GITHUB_ENV"
+            echo "::notice::Using Apple Developer ID signing and notarization."
+          else
+            echo "MACOS_SIGNING_MODE=adhoc" >> "$GITHUB_ENV"
+            echo "APPLE_SIGNING_IDENTITY=-" >> "$GITHUB_ENV"
+            echo "::notice::Missing Apple signing secrets: ${missing[*]}. Publishing an ad-hoc signed macOS DMG."
+          fi
 
       - name: Import Apple Developer ID certificate
         if: matrix.kind == 'macos'
@@ -95,6 +102,11 @@ jobs:
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
+          if [[ "${MACOS_SIGNING_MODE:-adhoc}" != "developer-id" ]]; then
+            echo "Skipping Apple Developer ID certificate import for ad-hoc macOS package."
+            exit 0
+          fi
+
           CERTIFICATE_PATH="$RUNNER_TEMP/developer-id.p12"
           KEYCHAIN_PATH="$RUNNER_TEMP/rastersvg-signing.keychain-db"
 
@@ -141,8 +153,14 @@ jobs:
           fi
 
           codesign --verify --deep --strict --verbose=4 "$APP_PATH"
-          spctl --assess --type execute --verbose=4 "$APP_PATH"
-          spctl --assess --type open --context context:primary-signature --verbose=4 "$DMG_PATH"
+
+          if [[ "${MACOS_SIGNING_MODE:-adhoc}" == "developer-id" ]]; then
+            spctl --assess --type execute --verbose=4 "$APP_PATH"
+            spctl --assess --type open --context context:primary-signature --verbose=4 "$DMG_PATH"
+          else
+            codesign -dv --verbose=4 "$APP_PATH"
+            echo "::notice::macOS app is ad-hoc signed and not notarized. Gatekeeper may require users to remove quarantine after download."
+          fi
 
       - name: Upload macOS package artifact
         if: matrix.kind == 'macos'
@@ -202,6 +220,8 @@ jobs:
 
           printf '%s\n\n' "RasterSVG desktop packages for macOS and Windows." > "$NOTES_FILE"
           printf '%s\n' "- macOS packages are DMG images." >> "$NOTES_FILE"
+          printf '%s\n' "- macOS DMGs are ad-hoc signed when Apple Developer ID secrets are not configured. If macOS says the app is damaged, copy it to Applications and run: xattr -dr com.apple.quarantine /Applications/RasterSVG.app" >> "$NOTES_FILE"
+          printf '%s\n' "- When Apple Developer ID secrets are configured, macOS DMGs are signed and notarized." >> "$NOTES_FILE"
           printf '%s\n' "- Windows uses the NSIS installer." >> "$NOTES_FILE"
           printf '%s\n' "- The native app does not bundle Python or scientific Python libraries." >> "$NOTES_FILE"
 

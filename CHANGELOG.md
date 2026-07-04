@@ -2,6 +2,17 @@
 
 All notable changes to RasterSVG will be documented in this file.
 
+## 0.1.4 - 2026-07-04
+
+### Changed
+
+- Updated the release workflow to publish ad-hoc signed macOS DMGs when Apple
+  Developer ID secrets are not configured.
+- Kept Developer ID signing and notarization support as the automatic path when
+  all Apple secrets are available.
+- Added README and release-note guidance for installing the unsigned macOS app
+  from GitHub.
+
 ## 0.1.3 - 2026-07-04
 
 ### Changed

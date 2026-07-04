@@ -1,6 +1,6 @@
 {
   "name": "rastersvg",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "description": "RasterSVG desktop shell and migration workspace.",
   "license": "GPL-2.0-or-later",
