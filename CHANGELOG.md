@@ -2,7 +2,14 @@
 
 All notable changes to RasterSVG will be documented in this file.
 
-## 0.1.0 - Unreleased
+## 0.1.1 - Unreleased
+
+### Fixed
+
+- Fixed Windows/MSVC compilation of vendored Potrace by explicitly including
+  `<stdint.h>` for `uint64_t`.
+
+## 0.1.0 - 2026-07-04
 
 Initial native desktop release candidate.
 

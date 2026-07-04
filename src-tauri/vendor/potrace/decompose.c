@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <stdint.h>
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif

@@ -11,3 +11,6 @@ GNU General Public License. See `COPYING`.
 Only the core `potracelib` files are vendored here. Command-line frontends and
 format-specific backends are intentionally excluded; RasterSVG generates its own
 layered SVG output from the Potrace curve API.
+
+Local portability patch: `decompose.c` explicitly includes `<stdint.h>` so
+MSVC builds can resolve `uint64_t` when compiling through Rust's `cc` crate.
