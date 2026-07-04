@@ -28,6 +28,10 @@ fi
 # Developer ID identity this falls back to a complete ad-hoc signature, which is
 # useful for local builds but still not enough for public Gatekeeper trust.
 export APPLE_SIGNING_IDENTITY="${APPLE_SIGNING_IDENTITY:--}"
+if [[ "$APPLE_SIGNING_IDENTITY" == "-" ]]; then
+  unset APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+  unset APPLE_API_KEY APPLE_API_ISSUER APPLE_API_KEY_PATH
+fi
 
 pnpm exec tauri build "${BUILD_ARGS[@]}"
 

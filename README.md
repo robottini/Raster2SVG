@@ -35,9 +35,9 @@ Compiled packages are available from the GitHub Releases page:
 
 Current compiled packages:
 
-- [Windows x64 installer](https://github.com/robottini/Raster2SVG/releases/download/v0.1.4/RasterSVG_0.1.4_x64-setup.exe)
-- [macOS Apple Silicon DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.4/RasterSVG_0.1.4_aarch64.dmg)
-- [macOS Intel DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.4/RasterSVG_0.1.4_x64.dmg)
+- [Windows x64 installer](https://github.com/robottini/Raster2SVG/releases/download/v0.1.5/RasterSVG_0.1.5_x64-setup.exe)
+- [macOS Apple Silicon DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.5/RasterSVG_0.1.5_aarch64.dmg)
+- [macOS Intel DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.5/RasterSVG_0.1.5_x64.dmg)
 
 Release packages are produced through GitHub Actions:
 
