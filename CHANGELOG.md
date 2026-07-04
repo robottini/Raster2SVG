@@ -2,7 +2,7 @@
 
 All notable changes to RasterSVG will be documented in this file.
 
-## 0.1.2 - Unreleased
+## 0.1.3 - 2026-07-04
 
 ### Changed
 
@@ -10,6 +10,8 @@ All notable changes to RasterSVG will be documented in this file.
   builds.
 - Updated the release workflow to publish macOS DMG and Windows installer
   assets after all package jobs complete.
+- Added macOS Developer ID signing and notarization support to the release
+  workflow, with a hard failure when signing secrets are missing.
 
 ## 0.1.1 - 2026-07-04
 

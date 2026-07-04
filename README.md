@@ -35,15 +35,19 @@ Compiled packages are available from the GitHub Releases page:
 
 Current compiled packages:
 
-- [Windows x64 installer](https://github.com/robottini/Raster2SVG/releases/download/v0.1.2/RasterSVG_0.1.2_x64-setup.exe)
-- [macOS Apple Silicon DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.2/RasterSVG_0.1.2_aarch64.dmg)
-- [macOS Intel DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.2/RasterSVG_0.1.2_x64.dmg)
+- [Windows x64 installer](https://github.com/robottini/Raster2SVG/releases/download/v0.1.3/RasterSVG_0.1.3_x64-setup.exe)
+- [macOS Apple Silicon DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.3/RasterSVG_0.1.3_aarch64.dmg)
+- [macOS Intel DMG](https://github.com/robottini/Raster2SVG/releases/download/v0.1.3/RasterSVG_0.1.3_x64.dmg)
 
 Release packages are produced through GitHub Actions:
 
 - macOS Apple Silicon `.dmg`;
 - macOS Intel `.dmg`;
 - Windows x64 NSIS installer.
+
+macOS release jobs require Apple Developer ID signing and notarization secrets
+before publishing, so GitHub downloads can pass Gatekeeper instead of appearing
+as damaged browser downloads.
 
 The release workflow is defined in:
 
@@ -189,8 +193,10 @@ Before tagging a release:
 4. Open the generated `.app` by double click.
 5. Convert a real image and save an SVG.
 6. Check the SVG contains vector `<path>` elements.
-7. Push a tag such as `v0.1.0`.
-8. Verify the release artifacts from GitHub Actions.
+7. Confirm the macOS signing and notarization secrets are present in GitHub
+   Actions.
+8. Push a tag such as `v0.1.0`.
+9. Verify the release artifacts from GitHub Actions.
 
 The full checklist is in `docs/release-checklist.md`.
 

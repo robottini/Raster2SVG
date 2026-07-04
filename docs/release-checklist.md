@@ -60,33 +60,34 @@ Expected result:
 
 ## GitHub Release Check
 
-1. Push the repository to GitHub.
-2. Create a tag such as:
+1. Confirm the macOS signing secrets are configured in GitHub Actions:
+   `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_ID`,
+   `APPLE_PASSWORD`, `APPLE_TEAM_ID` and `KEYCHAIN_PASSWORD`.
+2. Push the repository to GitHub.
+3. Create a tag such as:
 
    ```bash
    git tag v0.1.0
    git push origin v0.1.0
    ```
 
-3. Open GitHub Actions.
-4. Confirm `Release Desktop Packages` succeeds for:
+4. Open GitHub Actions.
+5. Confirm `Release Desktop Packages` succeeds for:
    - macOS Apple Silicon;
    - macOS Intel;
    - Windows x64.
-5. Open the published release.
-6. Confirm all expected artifacts are attached:
+6. Open the published release.
+7. Confirm all expected artifacts are attached:
    - macOS Apple Silicon `.dmg`;
    - macOS Intel `.dmg`;
    - Windows x64 `.exe`.
-7. Edit release notes if needed.
+8. Download each macOS DMG from GitHub in a browser and open the copied app from
+   `/Applications` without removing quarantine manually.
+9. Edit release notes if needed.
 
 ## Optional Signing Work
 
-Unsigned builds are acceptable for the first open-source release candidate, but
-users may see platform security warnings.
-
 Future release hardening:
 
-- Apple Developer ID signing and notarization;
 - Windows Authenticode signing;
 - Apple-styled DMG background and icon positioning.

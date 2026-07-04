@@ -24,6 +24,11 @@ else
   esac
 fi
 
+# Tauri must sign the app bundle itself before creating the DMG. Without a
+# Developer ID identity this falls back to a complete ad-hoc signature, which is
+# useful for local builds but still not enough for public Gatekeeper trust.
+export APPLE_SIGNING_IDENTITY="${APPLE_SIGNING_IDENTITY:--}"
+
 pnpm exec tauri build "${BUILD_ARGS[@]}"
 
 APP_PATH="$TARGET_ROOT/bundle/macos/$APP_NAME"
@@ -44,7 +49,7 @@ trap 'rm -rf "$WORK_DIR"' EXIT
 DMG_ROOT="$WORK_DIR/root"
 mkdir -p "$DMG_ROOT"
 
-ditto "$APP_PATH" "$DMG_ROOT/$APP_NAME"
+ditto --rsrc --extattr --acl "$APP_PATH" "$DMG_ROOT/$APP_NAME"
 ln -s /Applications "$DMG_ROOT/Applications"
 
 hdiutil create \
@@ -53,5 +58,20 @@ hdiutil create \
   -ov \
   -format UDZO \
   "$DMG_PATH"
+
+if [[ "$APPLE_SIGNING_IDENTITY" != "-" ]]; then
+  codesign --force --sign "$APPLE_SIGNING_IDENTITY" "$DMG_PATH"
+
+  if [[ -n "${APPLE_ID:-}" && -n "${APPLE_PASSWORD:-}" && -n "${APPLE_TEAM_ID:-}" ]]; then
+    xcrun notarytool submit "$DMG_PATH" \
+      --apple-id "$APPLE_ID" \
+      --password "$APPLE_PASSWORD" \
+      --team-id "$APPLE_TEAM_ID" \
+      --wait
+    xcrun stapler staple "$DMG_PATH"
+  else
+    echo "Skipping DMG notarization because Apple notarization credentials are not set." >&2
+  fi
+fi
 
 echo "$DMG_PATH"

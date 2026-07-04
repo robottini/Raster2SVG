@@ -51,6 +51,10 @@ It runs on:
 The workflow uploads build artifacts from the matrix jobs, then publishes a
 GitHub release after all platform packages have been produced.
 
+macOS release jobs require Apple Developer ID signing and notarization secrets.
+If the secrets are missing, the macOS jobs fail before packaging so an unsigned
+DMG is not published by accident.
+
 ## Windows WebView2 Choice
 
 The Windows package keeps Tauri's small installer strategy:
@@ -72,18 +76,30 @@ If a fully offline Windows installer becomes mandatory, switch this to
 
 ## Signing and Notarization
 
-Current release builds are unsigned.
+macOS release builds should be signed with a Developer ID Application
+certificate and notarized by Apple before publication. This is what allows
+Gatekeeper to accept a DMG downloaded from GitHub without reporting that the app
+is damaged.
 
-Consequences:
+Required GitHub repository secrets for macOS release jobs:
 
-- macOS may show Gatekeeper warnings for downloaded builds;
-- Windows may show SmartScreen warnings for unsigned installers.
+- `APPLE_CERTIFICATE`: base64 encoded exported `.p12` Developer ID Application
+  certificate;
+- `APPLE_CERTIFICATE_PASSWORD`: password used when exporting the `.p12`;
+- `APPLE_ID`: Apple ID email used for notarization;
+- `APPLE_PASSWORD`: app-specific password for that Apple ID;
+- `APPLE_TEAM_ID`: Apple Developer Team ID;
+- `KEYCHAIN_PASSWORD`: temporary keychain password used only inside Actions.
 
-Optional future work:
+The `pnpm run tauri:build:dmg` path first lets Tauri build and sign the `.app`
+bundle, then creates a simple DMG that contains the signed app and an
+Applications shortcut. When `APPLE_SIGNING_IDENTITY`, `APPLE_ID`,
+`APPLE_PASSWORD` and `APPLE_TEAM_ID` are set, the script also signs and notarizes
+the DMG. Without a signing identity, it defaults to Tauri ad-hoc signing for
+local testing only.
 
-- add Apple Developer ID signing and notarization secrets;
-- add Windows code-signing certificate secrets;
-- keep unsigned local builds for development.
+Windows release builds are still unsigned, so Windows SmartScreen may warn until
+a Windows code-signing certificate is added.
 
 ## References Checked
 
